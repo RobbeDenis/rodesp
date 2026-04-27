@@ -1,4 +1,5 @@
 #pragma once
+
 #include <numbers>
 #include <concepts>
 #include <smmintrin.h>
