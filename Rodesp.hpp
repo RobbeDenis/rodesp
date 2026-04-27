@@ -17,8 +17,12 @@ namespace rodesp
 	{
 		template<std::floating_point T>
 		inline constexpr T pi2_v{ std::numbers::pi_v<T> *T{ 2 } };
+
+		template<std::floating_point T>
+		inline constexpr T inv_pi2_v{ T{ 1 } / std::numbers::pi_v<T> *T{ 2 } };
 	}
 
+	// look into negative phase
 	inline float WrapPhase(float phase)
 	{
 		return phase - static_cast<int>(phase);
@@ -38,7 +42,7 @@ namespace rodesp
 
 		#else
 			// fallback
-			return phase - static_cast<int>(phase);
+			return WrapPhase(phase);
 		#endif
 		}
 	}
