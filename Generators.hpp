@@ -1,7 +1,9 @@
 #pragma once
 
-#include <cmath>
+#include <bit>
 #include <span>
+#include <cmath>
+#include <cstdint>
 
 #include "Rodesp.hpp"
 
@@ -38,7 +40,7 @@ namespace rodesp::gen
 			const float deltaPhase{ 1.f / args.SampleRate * args.Frequency };
 			Phase = exp::FastWrapPhase(Phase);
 
-			for (auto& sample : args.Buffer)
+			for (float& sample : args.Buffer)
 			{
 				sample = args.Amplitude * Generate(Phase);
 				Phase = exp::FastWrapPhase(Phase + deltaPhase);
@@ -61,7 +63,37 @@ namespace rodesp::gen
 	{
 		inline float operator()(float phase)
 		{
-			return (phase * 2.f) + (-1.f);
+			return (phase * 2.f) - 1.f;
+		}
+	};
+
+	//template<float duty = 0.5f>
+	struct SquareWave
+	{
+		inline float operator()(float phase)
+		{
+			constexpr float duty{ 0.5f };
+			return (phase < duty) ? 1.f : -1.f;
+		}
+	};
+
+	// did not do any testing at all to see if this is faster
+	// branch prediction might even be better with static duty cycle
+	struct SquareWaveBranchless
+	{
+		inline float operator()(float phase)
+		{
+			constexpr float duty{ 0.5f };
+
+			// save the floats 1.f and -1.f as bit values
+			constexpr uint32_t high = std::bit_cast<uint32_t>(1.f);
+			constexpr uint32_t low = std::bit_cast<uint32_t>(-1.f);
+
+			// phase <  duty	=> -1 or 0xFFFF...FFFF
+			// phase >= duty	=>  0 or 0x0000...0000
+			// the mask then decides the output 0 => high and -1 => low
+			const int32_t mask = static_cast<int32_t>(phase < duty) - 1;
+			return std::bit_cast<float>((~mask & high) | (mask & low));
 		}
 	};
 }
