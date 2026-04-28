@@ -30,7 +30,7 @@ namespace rodesp::gen
 
 	/*	Functor used to populate a float buffer based on the Wave implementation.
 	*	a valid wave functor has both a float input and output
-	*	input is the current normalized phase 0-1
+	*	input is the current normalized phase [0, 1]
 	*	output is the calculated value for that phase */
 	template<ValidWave Wave>
 	struct GenerateBlock
@@ -94,6 +94,27 @@ namespace rodesp::gen
 			// the mask then decides the output 0 => high and -1 => low
 			const int32_t mask = static_cast<int32_t>(phase < duty) - 1;
 			return std::bit_cast<float>((~mask & high) | (mask & low));
+		}
+	};
+
+	// expesive
+	struct TriangleWaveExp
+	{
+		inline float operator()(float phase)
+		{
+			return numbers::inv2_pi_v<float> *std::asinf(std::sinf(numbers::pi2_v<float> *phase));
+		}
+	};
+
+	// this method does not correlate with a sine wave => phase is shifted +90deg
+	// find a way to fic this here, or rethink when and where the phase should be wrapped
+	struct TriangleWave
+	{
+		inline float operator()(float phase)
+		{
+			// from [0, 1] to [-1, 1]
+			const float scaledPhase{ (2.f * phase) - 1.f };
+			return (2.f * std::abs(scaledPhase)) - 1.f;
 		}
 	};
 }

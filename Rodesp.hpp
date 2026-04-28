@@ -20,6 +20,9 @@ namespace rodesp
 
 		template<std::floating_point T>
 		inline constexpr T inv_pi2_v{ T{ 1 } / std::numbers::pi_v<T> *T{ 2 } };
+
+		template<std::floating_point T>
+		inline constexpr T inv2_pi_v{ T{ 2 } / std::numbers::pi_v<T> };
 	}
 
 	// look into negative phase
