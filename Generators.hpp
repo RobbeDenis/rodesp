@@ -26,7 +26,10 @@ namespace rodesp::gen
 		std::span<float> Buffer;
 	};
 
-	// Functor used to populate a float buffer based on the Wave
+	/*	Functor used to populate a float buffer based on the Wave implementation.
+	*	a valid wave functor has both a float input and output
+	*	input is the current normalized phase 0-1
+	*	output is the calculated value for that phase */
 	template<ValidWave Wave>
 	struct GenerateBlock
 	{
@@ -54,11 +57,11 @@ namespace rodesp::gen
 		}
 	};
 
-	struct CosinefWave
+	struct SawtoothWave
 	{
 		inline float operator()(float phase)
 		{
-			return std::cosf(numbers::pi2_v<float> * phase);
+			return (phase * 2.f) + (-1.f);
 		}
 	};
 }
