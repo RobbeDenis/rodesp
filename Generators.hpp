@@ -6,20 +6,10 @@
 #include <cstdint>
 
 #include "Rodesp.hpp"
+#include "GenValidation.hpp"
 
 namespace rodesp::gen
 {
-	namespace detail
-	{
-		template<typename T>
-		concept has_float_implementation = requires(T v, float phase){
-			{ v(phase) } -> std::same_as<float>;
-		};
-	}
-
-	template<typename T>
-	concept ValidWave = detail::has_float_implementation<T>;
-
 	struct GenerateArgs
 	{
 		float SampleRate{ 0.f };
@@ -47,10 +37,13 @@ namespace rodesp::gen
 			}
 		}
 
+		// save start phase in case I need it in the future e.g. reset
+		const float StartPhase{ GetStartPhase<Wave>() };
+		float Phase{ GetStartPhase<Wave>() };
 		Wave Generate{ };
-		float Phase{ 0.f };
 	};
 
+	// TODO: look into other ways that dont involve calling sinf
 	struct SinefWave
 	{
 		inline float operator()(float phase)
@@ -61,13 +54,14 @@ namespace rodesp::gen
 
 	struct SawtoothWave
 	{
+		static constexpr float StartPhase{ 0.5f };
+
 		inline float operator()(float phase)
 		{
 			return (phase * 2.f) - 1.f;
 		}
 	};
 
-	//template<float duty = 0.5f>
 	struct SquareWave
 	{
 		inline float operator()(float phase)
@@ -77,7 +71,7 @@ namespace rodesp::gen
 		}
 	};
 
-	// did not do any testing at all to see if this is faster
+	// TODO: compare performance with SquareWave
 	// branch prediction might even be better with static duty cycle
 	struct SquareWaveBranchless
 	{
@@ -97,24 +91,25 @@ namespace rodesp::gen
 		}
 	};
 
-	// expesive
-	struct TriangleWaveExp
+	struct TriangleWave
 	{
+		static constexpr float StartPhase{ 0.75f };
+
 		inline float operator()(float phase)
 		{
-			return numbers::inv2_pi_v<float> *std::asinf(std::sinf(numbers::pi2_v<float> *phase));
+			const float scaledPhase{ (2.f * phase) - 1.f };
+			return (2.f * std::abs(scaledPhase)) - 1.f;
 		}
 	};
 
-	// this method does not correlate with a sine wave => phase is shifted +90deg
-	// find a way to fic this here, or rethink when and where the phase should be wrapped
-	struct TriangleWave
+	// TODO: compare long runtime accuracy between this and TriangleWave
+	struct TriangleWaveExp
 	{
+		static constexpr float StartPhase{ 0.75f };
+
 		inline float operator()(float phase)
 		{
-			// from [0, 1] to [-1, 1]
-			const float scaledPhase{ (2.f * phase) - 1.f };
-			return (2.f * std::abs(scaledPhase)) - 1.f;
+			return numbers::inv2_pi_v<float> * std::asinf(std::sinf(numbers::pi2_v<float> * phase));
 		}
 	};
 }
