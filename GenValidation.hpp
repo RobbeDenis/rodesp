@@ -1,6 +1,6 @@
 #pragma once
 
-namespace rodesp::gen
+namespace rodesp
 {
 	namespace detail
 	{

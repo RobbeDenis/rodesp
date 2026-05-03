@@ -8,7 +8,7 @@
 #include "Rodesp.hpp"
 #include "GenValidation.hpp"
 
-namespace rodesp::gen
+namespace rodesp
 {
 	struct GenerateArgs
 	{
@@ -29,7 +29,7 @@ namespace rodesp::gen
 		{
 			const float deltaPhase{ 1.f / args.SampleRate * args.Frequency };
 			Phase = exp::FastWrapPhase(Phase);
-
+			
 			for (float& sample : args.Buffer)
 			{
 				sample = args.Amplitude * Generate(Phase);
@@ -103,7 +103,7 @@ namespace rodesp::gen
 	};
 
 	// TODO: compare long runtime accuracy between this and TriangleWave
-	struct TriangleWaveExp
+	struct TriangleWavePureMath
 	{
 		static constexpr float StartPhase{ 0.75f };
 

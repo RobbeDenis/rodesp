@@ -7,7 +7,7 @@
 #include "Rodesp.hpp"
 #include "GenValidation.hpp"
 
-namespace rodesp::gen
+namespace rodesp
 {
 	// MSVC c++26 does not support constexpr std::pow yet
 	// does not check for overflow
