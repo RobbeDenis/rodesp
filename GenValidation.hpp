@@ -14,7 +14,7 @@ namespace rodesp::gen
 	concept ValidWave = detail::has_float_implementation<T>;
 
 	template<typename T>
-	concept HasStartPhase = requires { { T::StartPhase } -> std::convertible_to<float>; };
+	concept HasStartPhase = requires { { T::StartPhase } -> std::same_as<float>; };
 
 	template<typename T>
 	consteval float GetStartPhase()
