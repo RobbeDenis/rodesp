@@ -21,7 +21,7 @@ namespace rodesp
 	concept ValidWave = detail::wave_has_phase<T> || detail::wave_has_delta<T>;
 
 	template<typename T>
-	concept HasStartPhase = requires { { T::StartPhase } -> std::same_as<float>; };
+	concept HasStartPhase = requires { { T::StartPhase } -> std::same_as<const float&>; };
 
 	template<typename T>
 	consteval float GetStartPhase()

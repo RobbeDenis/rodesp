@@ -4,7 +4,6 @@
 #include <span>
 #include <cmath>
 #include <cstdint>
-#include <utility>
 #include <type_traits>
 
 #include "Rodesp.hpp"
@@ -46,7 +45,7 @@ namespace rodesp
 		Wave Generate{ };
 
 	private:
-		inline float StaticGenerate(float phase, float delta)
+		constexpr inline float StaticGenerate(float phase, float delta)
 		{
 			if constexpr (std::is_invocable_v<Wave, float, float>)
 			{

@@ -96,7 +96,6 @@ namespace rodesp
 
 		DepthWave GenerateDepth{ };
 		float DepthPhase{ 0.f };
-		//float PrevPhase{ 0.f };
 	};
 }
 
