@@ -4,6 +4,8 @@
 #include <span>
 #include <cmath>
 #include <cstdint>
+#include <utility>
+#include <type_traits>
 
 #include "Rodesp.hpp"
 #include "GenValidation.hpp"
@@ -19,9 +21,10 @@ namespace rodesp
 	};
 
 	/*	Functor used to populate a float buffer based on the Wave implementation.
-	*	a valid wave functor has both a float input and output
-	*	input is the current normalized phase [0, 1]
-	*	output is the calculated value for that phase */
+	*	to have a valid wave functor it needs at least a float input param (phase) and float output
+	*	the phase will be normalized to [0, 1]
+	*	all possible input params in order are:
+	*	float phase, float deltaPhase */
 	template<ValidWave Wave>
 	struct GenerateBlock
 	{
@@ -32,7 +35,7 @@ namespace rodesp
 			
 			for (float& sample : args.Buffer)
 			{
-				sample = args.Amplitude * Generate(Phase);
+				sample = args.Amplitude * StaticGenerate(Phase, deltaPhase);
 				Phase = exp::FastWrapPhase(Phase + deltaPhase);
 			}
 		}
@@ -41,6 +44,19 @@ namespace rodesp
 		const float StartPhase{ GetStartPhase<Wave>() };
 		float Phase{ GetStartPhase<Wave>() };
 		Wave Generate{ };
+
+	private:
+		inline float StaticGenerate(float phase, float delta)
+		{
+			if constexpr (std::is_invocable_v<Wave, float, float>)
+			{
+				return Generate(phase, delta);
+			}
+			else
+			{
+				return Generate(phase);
+			}
+		}
 	};
 
 	// TODO: look into other ways that dont involve calling sinf

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <cassert>
 #include <bit>
 
 #include "Rodesp.hpp"
@@ -72,16 +71,13 @@ namespace rodesp
 		static constexpr float DepthDeviation{ 4.f };
 		static constexpr float DepthFrequency{ 0.5f };
 
-		inline float operator()(float phase)
+		inline float operator()(float phase, float delta)
 		{
 			const float depth{ MinDepth + (GenerateDepth(DepthPhase) * DepthDeviation) };
 			const float n{ std::powf(Base, depth) };
 			uint32_t segmentIndex{ static_cast<uint32_t>(phase * n) };
 
-			// TODO: should be replaced by deltaPhase param (has already been calculated)
-			const float delta{ phase - PrevPhase };
-			PrevPhase = phase;
-			DepthPhase += DepthFrequency * (delta < 0.f ? phase : delta);
+			DepthPhase += DepthFrequency * delta;
 			DepthPhase = exp::FastWrapPhase(DepthPhase);
 
 			// TODO: test different was to play with the sign of depth
@@ -100,7 +96,7 @@ namespace rodesp
 
 		DepthWave GenerateDepth{ };
 		float DepthPhase{ 0.f };
-		float PrevPhase{ 0.f };
+		//float PrevPhase{ 0.f };
 	};
 }
 
